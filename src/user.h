@@ -11,7 +11,8 @@ struct user_error
     const enum {
         network_error = 1,
         server_error,
-        not_in_chat
+        not_in_chat,
+        json_parse_error
     } tag;
     const QString reason;
 
@@ -21,7 +22,7 @@ struct user_error
 
 class user
 {
-    static const char* const key;
+    static const char* const apiKey;
     static const char* const apiUrl;
 
     QString user_name;
@@ -34,6 +35,8 @@ private:
     uint create(const QString& _user_name,const QDateTime& _expire_date);
     bool login(const QString& _user_name, const uint &_user_certify);
 
+    friend QDebug operator << (QDebug debugOut, const user& _user);
+
 public:
     user(const QString& _user_name,const QDateTime& _expire_date);
     user(const QString& _user_name, const uint &_user_certify);
@@ -43,8 +46,6 @@ public:
     static bool is_exist(const QString& _user_name);
 };
 
-const char* const user::key = "vczh";
-const char* const user::apiUrl = "https://c.imtwice.cn/api/chat.php";
-
+QDebug operator << (QDebug debugOut, const user& _user);
 
 #endif // USER_H

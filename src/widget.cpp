@@ -1,28 +1,42 @@
 #include "widget.h"
 #include "ui_widget.h"
+#include <QDebug>
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Widget),
     loginingAnime(nullptr),
     msgBar(nullptr),
-    usernameCol(nullptr)
+    usernameCol(nullptr),
+    certifyCol(nullptr),
+    dateCol(nullptr),
+    systemColor(QtWin::realColorizationColor())
 {
     ui->setupUi(this);
 
     setAttribute(Qt::WA_NoSystemBackground, false);
-    setStyleSheet(QString("Widget{ background: %1; }").arg(QtWin::realColorizationColor().name()));
+    setStyleSheet(QString("Widget{ background: %1; }").arg(systemColor.name()));
 
     setFixedSize(width(),height());
 
     loginingAnime = new WaitingAnime(QRect(20,260,321,31),Qt::white,this);
-    loginingAnime->setStyleSheet(QString("QGraphicsView{ border: 0;background: %1; }").arg(QtWin::realColorizationColor().name()));
+    loginingAnime->setStyleSheet(QString("QGraphicsView{ border: 0;background: %1; }").arg(systemColor.name()));
 
     msgBar = new MessageBar(this,30);
 
-    usernameCol = new ButtonEdit(QRect(20,225,330,45),QIcon(":/ico/login"),this,"USER NAME...");
+    QRect colRect = QRect(20,225,330,45);
+    QRect colRightRect = QRect(20 + width(),225,330,45);
+    QDateTime nowDateTime = QDateTime::currentDateTime().addSecs(600);
+
+    usernameCol = new ButtonEdit(colRect,QIcon(":/ico/next"),this,"USER NAME...");
+    dateCol = new ButtonDateEdit(colRightRect,QIcon(":/ico/register"),nowDateTime,nowDateTime.addDays(30),systemColor.lighter(150).name(),this,"EXPIRE DATE...");
+    certifyCol = new ButtonEdit(colRightRect,QIcon(":/ico/login"),this,"USER CERTIFY...");
 
     connect(usernameCol,SIGNAL(buttonClicked(bool)),this,SLOT(usernameButtonClicked(bool)));
+    connect(usernameCol,SIGNAL(endMoveBy()),this,SLOT(colMoveEnd()));
+
+    connect(dateCol,SIGNAL(buttonClicked(bool)),this,SLOT(dateButtonClicked(bool)));
+    connect(certifyCol,SIGNAL(buttonClicked(bool)),this,SLOT(certifyButtonClicked(bool)));
 
 }
 
@@ -32,18 +46,112 @@ Widget::~Widget()
     delete loginingAnime;
     delete msgBar;
     delete usernameCol;
+    delete dateCol;
 
 }
 
 void Widget::usernameButtonClicked(bool)
 {
-    if(usernameCol->refEdit().text() == "")
+    if(checkColBlank(usernameCol,"cannot leave username blank")) return;
+
+    loginingAnime->start();
+
+    bool userIsExist = false;
+    try
     {
-        msgBar->warning("cannot leave username blank");
-        usernameCol->clickedProcessEnd();
+        userIsExist = user::is_exist(usernameCol->refEdit().text());
+    }
+    catch(user_error& err)
+    {
+        forceStopColProcess(usernameCol,(err.tag == user_error::network_error)?
+                            "network error, please check your connection." : err.reason);
         return;
     }
 
-    msgBar->information("hello, i am WHATSCHAT", QtWin::realColorizationColor().darker(150));
-    loginingAnime->start();
+    if(userIsExist) nextColProcess(usernameCol,certifyCol,"please input your certify");
+    else nextColProcess(usernameCol,dateCol,"now to create the user...");
 }
+
+void Widget::colMoveEnd()
+{
+    loginingAnime->stop();
+}
+
+void Widget::dateButtonClicked(bool)
+{
+    if(checkColBlank(dateCol,"cannot leave expire date blank")) return;
+
+    loginingAnime->start();
+
+    user* userPtr = nullptr;
+    try
+    {
+        userPtr = new user(usernameCol->refEdit().text(),dateCol->dateTime());
+    }
+    catch(user_error& err)
+    {
+        forceStopColProcess(dateCol,(err.tag == user_error::network_error)?
+                            "network error, please check your connection." : err.reason);
+        return;
+    }
+
+    nextColProcess(dateCol,nullptr,"welcome to WHATSCHAT...");
+    qDebug() << *userPtr;
+
+}
+
+void Widget::certifyButtonClicked(bool)
+{
+    if(checkColBlank(certifyCol,"cannot leave user certify blank")) return;
+
+    uint certify = certifyCol->refEdit().text().toUInt();
+    if(certify == 0)
+    {
+        forceStopColProcess(certifyCol,"cannot input the invaild certify");
+        return;
+    }
+
+    loginingAnime->start();
+
+    user* userPtr = nullptr;
+    try
+    {
+        userPtr = new user(usernameCol->refEdit().text(),certify);
+    }
+    catch(user_error& err)
+    {
+        forceStopColProcess(certifyCol,(err.tag == user_error::network_error)?
+                            "network error, please check your connection." : err.reason);
+        return;
+    }
+
+    nextColProcess(certifyCol,nullptr,"welcome to WHATSCHAT...");
+    qDebug() << *userPtr;
+
+}
+
+void Widget::forceStopColProcess(ButtonEdit * const col, const QString &warningString)
+{
+    msgBar->warning(warningString);
+    col->clickedProcessEnd();
+    loginingAnime->stop();
+}
+
+bool Widget::checkColBlank(ButtonEdit * const col, const QString &warningString)
+{
+    if(col->refEdit().text() == "")
+    {
+        forceStopColProcess(col,warningString);
+        return true;
+    }
+
+    return false;
+}
+
+void Widget::nextColProcess(ButtonEdit * const nowCol, ButtonEdit * const nextCol, const QString& infoString)
+{
+    if(infoString != "") msgBar->information(infoString,systemColor.darker(150));
+    if(nowCol != nullptr) nowCol->startMoveBy({(float)width(),0});
+    if(nextCol != nullptr) nextCol->startMoveBy({(float)width(),0});
+}
+

@@ -29,14 +29,16 @@ SOURCES += \
     user.cpp \
     waitinganime.cpp \
     messagebar.cpp \
-    buttonedit.cpp
+    buttonedit.cpp \
+    buttondateedit.cpp
 
 HEADERS += \
         widget.h \
     user.h \
     waitinganime.h \
     messagebar.h \
-    buttonedit.h
+    buttonedit.h \
+    buttondateedit.h
 
 FORMS += \
         widget.ui

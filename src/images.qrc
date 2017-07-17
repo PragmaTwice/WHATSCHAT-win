@@ -4,8 +4,11 @@
         <file alias="normal">image/logo_normal.png</file>
     </qresource>
     <qresource prefix="/ico">
-        <file alias="login">image/login.png</file>
         <file alias="warning">image/alert.png</file>
         <file alias="information">image/information.png</file>
+        <file alias="next">image/next.png</file>
+        <file alias="back">image/back.png</file>
+        <file alias="login">image/login.png</file>
+        <file alias="register">image/register.png</file>
     </qresource>
 </RCC>

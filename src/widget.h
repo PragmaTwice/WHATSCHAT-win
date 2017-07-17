@@ -7,6 +7,8 @@
 #include "waitinganime.h"
 #include "messagebar.h"
 #include "buttonedit.h"
+#include "buttondateedit.h"
+#include "user.h"
 
 namespace Ui {
 class Widget;
@@ -22,14 +24,28 @@ public:
 
 private slots:
     void usernameButtonClicked(bool);
+    void colMoveEnd();
+
+    void dateButtonClicked(bool);
+    void certifyButtonClicked(bool);
 
 private:
     Ui::Widget *ui;
+
     WaitingAnime* loginingAnime;
     MessageBar* msgBar;
+
     ButtonEdit* usernameCol;
+    ButtonEdit* certifyCol;
+    ButtonDateEdit* dateCol;
+
+    QColor systemColor;
 
     void editMove(int duration, QMargins margins);
+    void forceStopColProcess(ButtonEdit* const col,const QString& warningString);
+    bool checkColBlank(ButtonEdit* const col,const QString& warningString);
+    void nextColProcess(ButtonEdit * const nowCol, ButtonEdit * const nextCol = nullptr, const QString &infoString = "");
+
 };
 
 #endif // WIDGET_H

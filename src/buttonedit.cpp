@@ -5,6 +5,7 @@ ButtonEdit::ButtonEdit(const QRect& geom, const QIcon &buttonImg, QWidget *paren
     edit(this),
     button(this),
     anime(nullptr),
+    move(nullptr),
     isProcessing(false)
 {
     setGeometry(geom);
@@ -23,9 +24,34 @@ ButtonEdit::ButtonEdit(const QRect& geom, const QIcon &buttonImg, QWidget *paren
     button.setStyleSheet("QPushButton{border:0;}");
 
     anime = new QPropertyAnimation(&edit,"geometry");
+    move = new QPropertyAnimation(this,"geometry");
 
     connect(&button,SIGNAL(clicked(bool)),this,SLOT(slot_buttonClicked(bool)));
+
+    connect(&edit,SIGNAL(focusIn()),this,SLOT(slot_focusInEdit()));
+    connect(&edit,SIGNAL(focusOut()),this,SLOT(slot_focusOutofEdit()));
+
     connect(anime,SIGNAL(finished()),this,SLOT(setFinalStatus()));
+    connect(move,SIGNAL(finished()),this,SLOT(slot_endMoveBy()));
+}
+
+void ButtonEdit::startMoveBy(const QVector2D &vector)
+{
+    move->stop();
+    move->setStartValue(geometry());
+    move->setEndValue(geometry() + QMargins(vector.x(),vector.y(),0,0));
+    move->setDuration(2*(vector.length()));
+    move->start();
+}
+
+void ButtonEdit::setCanEdit(bool isCanEdit)
+{
+    edit.setReadOnly(!isCanEdit);
+}
+
+void ButtonEdit::setEditText(const QString &text)
+{
+    edit.setText(text);
 }
 
 const QLineEdit &ButtonEdit::refEdit()
@@ -41,12 +67,14 @@ const QPushButton &ButtonEdit::refButton()
 ButtonEdit::~ButtonEdit()
 {
     delete anime;
+    delete move;
 }
 
 void ButtonEdit::slot_buttonClicked(bool arg)
 {
     edit.setReadOnly(true);
     button.setVisible(false);
+    edit.clearFocus();
     isProcessing = true;
 
     anime->stop();
@@ -58,13 +86,33 @@ void ButtonEdit::slot_buttonClicked(bool arg)
     emit buttonClicked(arg);
 }
 
+void ButtonEdit::slot_endMoveBy()
+{
+    emit endMoveBy();
+}
+
 void ButtonEdit::setFinalStatus()
 {
     if(!isProcessing)
     {
         button.setVisible(true);
         edit.setReadOnly(false);
+        edit.setFocus();
     }
+    else
+    {
+        edit.clearFocus();
+    }
+}
+
+void ButtonEdit::slot_focusInEdit()
+{
+    emit focusInEdit();
+}
+
+void ButtonEdit::slot_focusOutofEdit()
+{
+    emit focusOutofEdit();
 }
 
 void ButtonEdit::clickedProcessEnd()
@@ -76,4 +124,14 @@ void ButtonEdit::clickedProcessEnd()
     anime->setEndValue(beginEditGeom);
     anime->setDuration(10*(edit.geometry().width() - beginEditGeom.width()));
     anime->start();
+}
+
+void FocusableLineEdit::focusInEvent(QFocusEvent *e)
+{
+    emit focusIn();
+}
+
+void FocusableLineEdit::focusOutEvent(QFocusEvent *e)
+{
+    emit focusOut();
 }

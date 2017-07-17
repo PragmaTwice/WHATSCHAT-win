@@ -1,8 +1,11 @@
 #include "user.h"
 
+const char* const user::apiKey = "vczh";
+const char* const user::apiUrl = "https://c.imtwice.cn/api/chat.v170713.php";
+
 QJsonDocument user::post(const QByteArray &data)
 {
-    QUrl url(apiUrl);
+    QUrl url(user::apiUrl);
     QNetworkAccessManager manager;
     QEventLoop loop;
 
@@ -17,9 +20,17 @@ QJsonDocument user::post(const QByteArray &data)
     {
     case QNetworkReply::NoError:
 
-        jsonResult.fromJson(reply->readAll());
+        QJsonParseError parseErr;
+        jsonResult = QJsonDocument::fromJson(reply->readAll(), &parseErr);
 
-        return jsonResult;
+        if(parseErr.error != QJsonParseError::NoError)
+        {
+            throw user_error(user_error::json_parse_error,parseErr.errorString());
+
+            jsonResult.setObject(QJsonObject{{"succeed",QJsonValue(false)}});
+            return jsonResult;
+        }
+        else return jsonResult;
 
     default:
 
@@ -38,7 +49,7 @@ QJsonDocument user::post(const QByteArray &data)
 uint user::create(const QString &_user_name, const QDateTime &_expire_date)
 {
     QByteArray data;
-    data.append(QString("key=%1&").arg(key));
+    data.append(QString("key=%1&").arg(user::apiKey));
     data.append(QString("opr=create_user&"));
     data.append(QString("user_name=%1&").arg(_user_name));
     data.append(QString("expire_date=%1").arg(_expire_date.toTime_t()));
@@ -61,7 +72,7 @@ uint user::create(const QString &_user_name, const QDateTime &_expire_date)
 bool user::login(const QString &_user_name, const uint &_user_certify)
 {
     QByteArray data;
-    data.append(QString("key=%1&").arg(key));
+    data.append(QString("key=%1&").arg(user::apiKey));
     data.append(QString("opr=login_user&"));
     data.append(QString("user_name=%1&").arg(_user_name));
     data.append(QString("user_certify=%1").arg(_user_certify));
@@ -107,8 +118,36 @@ bool user::is_exist(const QString &_user_name)
     }
     catch(const user_error& err)
     {
-        if(err.tag == user_error::server_error && err.reason == "certify error")
-            return true;
-        else return false;
+        if(err.tag == user_error::server_error)
+        {
+            if(err.reason == "certify error")
+                return true;
+            else if(err.reason == "user not existed" || err.reason == "user expire date")
+                return false;
+            else
+            {
+                throw err;
+                return false;
+            }
+        }
+        else
+        {
+            throw err;
+            return false;
+        }
     }
+
+    return false;
+}
+
+QDebug operator <<(QDebug debugOut, const user &_user)
+{
+#if defined QT_DEBUG
+    debugOut << QString("user(%1){user_name:%2,user_certify:%3,temp_key:%4}")
+                .arg((const int)&_user)
+                .arg(_user.user_name)
+                .arg(_user.user_certify)
+                .arg(_user.temp_key);
+#endif
+    return debugOut;
 }
