@@ -143,6 +143,7 @@ void Widget::forceStopColProcess(ButtonEdit * const col, const QString &warningS
     msgBar->warning(warningString);
     col->clickedProcessEnd();
     loginingAnime->stop();
+    if(nowCol != usernameCol) ui->backButton->setVisible(true);
 }
 
 bool Widget::checkColBlank(ButtonEdit * const col, const QString &warningString)
@@ -170,12 +171,15 @@ void Widget::backColProcess(ButtonEdit * const _nowCol, ButtonEdit * const backC
 {
     if(infoString != "") msgBar->information(infoString,systemColor.darker(150),Qt::white,interval);
 
-    if(_nowCol != nullptr) _nowCol->startMoveBy({(float)(-width()),0});
+    if(_nowCol != nullptr)
+    {
+        _nowCol->startMoveBy({(float)(-width()),0});
+        _nowCol->setEditText("");
+    }
     if(backCol != nullptr)
     {
         backCol->startMoveBy({(float)(-width()),0});
         backCol->clickedProcessEnd();
-        backCol->setEditText("");
     }
 
     nowCol = backCol;
