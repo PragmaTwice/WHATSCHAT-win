@@ -25,7 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        widget.cpp \
+        loginwidget.cpp \
     user.cpp \
     waitinganime.cpp \
     messagebar.cpp \
@@ -33,7 +33,7 @@ SOURCES += \
     buttondateedit.cpp
 
 HEADERS += \
-        widget.h \
+        loginwidget.h \
     user.h \
     waitinganime.h \
     messagebar.h \
@@ -41,7 +41,7 @@ HEADERS += \
     buttondateedit.h
 
 FORMS += \
-        widget.ui
+        loginwidget.ui
 
 RESOURCES += \
     images.qrc
