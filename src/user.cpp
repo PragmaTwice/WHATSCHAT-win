@@ -105,7 +105,12 @@ user::user(const QString &_user_name, const uint &_user_certify)
     login(_user_name,_user_certify);
 }
 
-QString user::get_name() const
+uint user::get_certify() const
+{
+    return user_certify;
+}
+
+const QString& user::get_name() const
 {
     return user_name;
 }

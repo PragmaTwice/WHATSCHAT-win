@@ -10,9 +10,11 @@ Widget::Widget(QWidget *parent) :
     usernameCol(nullptr),
     certifyCol(nullptr),
     dateCol(nullptr),
+    nowCol(nullptr),
     systemColor(QtWin::realColorizationColor())
 {
     ui->setupUi(this);
+    ui->backButton->setVisible(false);
 
     setAttribute(Qt::WA_NoSystemBackground, false);
     setStyleSheet(QString("Widget{ background: %1; }").arg(systemColor.name()));
@@ -31,6 +33,8 @@ Widget::Widget(QWidget *parent) :
     usernameCol = new ButtonEdit(colRect,QIcon(":/ico/next"),this,"USER NAME...");
     dateCol = new ButtonDateEdit(colRightRect,QIcon(":/ico/register"),nowDateTime,nowDateTime.addDays(30),systemColor.lighter(150).name(),this,"EXPIRE DATE...");
     certifyCol = new ButtonEdit(colRightRect,QIcon(":/ico/login"),this,"USER CERTIFY...");
+
+    nowCol = usernameCol;
 
     connect(usernameCol,SIGNAL(buttonClicked(bool)),this,SLOT(usernameButtonClicked(bool)));
     connect(usernameCol,SIGNAL(endMoveBy()),this,SLOT(colMoveEnd()));
@@ -68,6 +72,8 @@ void Widget::usernameButtonClicked(bool)
         return;
     }
 
+    ui->backButton->setVisible(true);
+
     if(userIsExist) nextColProcess(usernameCol,certifyCol,"please input your certify");
     else nextColProcess(usernameCol,dateCol,"now to create the user...");
 }
@@ -82,6 +88,7 @@ void Widget::dateButtonClicked(bool)
     if(checkColBlank(dateCol,"cannot leave expire date blank")) return;
 
     loginingAnime->start();
+    ui->backButton->setVisible(false);
 
     user* userPtr = nullptr;
     try
@@ -95,7 +102,7 @@ void Widget::dateButtonClicked(bool)
         return;
     }
 
-    nextColProcess(dateCol,nullptr,"welcome to WHATSCHAT...");
+    nextColProcess(dateCol,nullptr,QString("your certify: <b>%1</b> , welcome...").arg(userPtr->get_certify()),10000);
     qDebug() << *userPtr;
 
 }
@@ -112,6 +119,7 @@ void Widget::certifyButtonClicked(bool)
     }
 
     loginingAnime->start();
+    ui->backButton->setVisible(false);
 
     user* userPtr = nullptr;
     try
@@ -125,7 +133,7 @@ void Widget::certifyButtonClicked(bool)
         return;
     }
 
-    nextColProcess(certifyCol,nullptr,"welcome to WHATSCHAT...");
+    nextColProcess(certifyCol,nullptr,"welcome back to WHATSCHAT...");
     qDebug() << *userPtr;
 
 }
@@ -148,10 +156,34 @@ bool Widget::checkColBlank(ButtonEdit * const col, const QString &warningString)
     return false;
 }
 
-void Widget::nextColProcess(ButtonEdit * const nowCol, ButtonEdit * const nextCol, const QString& infoString)
+void Widget::nextColProcess(ButtonEdit * const _nowCol, ButtonEdit * const nextCol, const QString& infoString, uint interval)
 {
-    if(infoString != "") msgBar->information(infoString,systemColor.darker(150));
-    if(nowCol != nullptr) nowCol->startMoveBy({(float)width(),0});
+    if(infoString != "") msgBar->information(infoString,systemColor.darker(150),Qt::white,interval);
+
+    if(_nowCol != nullptr) _nowCol->startMoveBy({(float)width(),0});
     if(nextCol != nullptr) nextCol->startMoveBy({(float)width(),0});
+
+    nowCol = nextCol;
 }
 
+void Widget::backColProcess(ButtonEdit * const _nowCol, ButtonEdit * const backCol, const QString& infoString, uint interval)
+{
+    if(infoString != "") msgBar->information(infoString,systemColor.darker(150),Qt::white,interval);
+
+    if(_nowCol != nullptr) _nowCol->startMoveBy({(float)(-width()),0});
+    if(backCol != nullptr)
+    {
+        backCol->startMoveBy({(float)(-width()),0});
+        backCol->clickedProcessEnd();
+        backCol->setEditText("");
+    }
+
+    nowCol = backCol;
+}
+
+
+void Widget::on_backButton_clicked(bool)
+{
+    backColProcess(nowCol,usernameCol);
+    ui->backButton->setVisible(false);
+}

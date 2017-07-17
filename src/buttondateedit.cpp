@@ -9,7 +9,6 @@ ButtonDateEdit::ButtonDateEdit(const QRect &geom, const QIcon &buttonImg, const 
 
 
     dateTimeSelector.setStyleSheet(QString("QDial {background : %1}").arg(selectorColor.name()));
-    dateTimeSelector.setNotchesVisible(true);
 
     connect(&dateTimeSelector,SIGNAL(sliderMoved(int)),this,SLOT(dialMoved(int)));
 }

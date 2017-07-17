@@ -29,6 +29,8 @@ private slots:
     void dateButtonClicked(bool);
     void certifyButtonClicked(bool);
 
+    void on_backButton_clicked(bool);
+
 private:
     Ui::Widget *ui;
 
@@ -39,13 +41,16 @@ private:
     ButtonEdit* certifyCol;
     ButtonDateEdit* dateCol;
 
+    ButtonEdit* nowCol;
+
     QColor systemColor;
 
     void editMove(int duration, QMargins margins);
     void forceStopColProcess(ButtonEdit* const col,const QString& warningString);
     bool checkColBlank(ButtonEdit* const col,const QString& warningString);
-    void nextColProcess(ButtonEdit * const nowCol, ButtonEdit * const nextCol = nullptr, const QString &infoString = "");
 
+    void nextColProcess(ButtonEdit * const nowCol, ButtonEdit * const nextCol = nullptr, const QString &infoString = "", uint interval = 4000);
+    void backColProcess(ButtonEdit * const nowCol, ButtonEdit * const backCol = nullptr, const QString &infoString = "", uint interval = 4000);
 };
 
 #endif // WIDGET_H

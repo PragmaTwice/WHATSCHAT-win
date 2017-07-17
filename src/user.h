@@ -11,7 +11,6 @@ struct user_error
     const enum {
         network_error = 1,
         server_error,
-        not_in_chat,
         json_parse_error
     } tag;
     const QString reason;
@@ -41,7 +40,8 @@ public:
     user(const QString& _user_name,const QDateTime& _expire_date);
     user(const QString& _user_name, const uint &_user_certify);
 
-    QString get_name() const;
+    const QString& get_name() const;
+    uint get_certify() const;
 
     static bool is_exist(const QString& _user_name);
 };
