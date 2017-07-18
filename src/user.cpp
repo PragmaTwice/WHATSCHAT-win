@@ -147,12 +147,11 @@ bool user::is_exist(const QString &_user_name)
 
 QDebug operator <<(QDebug debugOut, const user &_user)
 {
-#if defined QT_DEBUG
     debugOut << QString("user(%1){user_name:%2,user_certify:%3,temp_key:%4}")
                 .arg((const int)&_user)
                 .arg(_user.user_name)
                 .arg(_user.user_certify)
                 .arg(_user.temp_key);
-#endif
+
     return debugOut;
 }

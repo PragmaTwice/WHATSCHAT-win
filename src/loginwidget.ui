@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Login...</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="images.qrc">
+    <normaloff>:/logo/chat</normaloff>:/logo/chat</iconset>
+  </property>
   <widget class="QLabel" name="logoLabel">
    <property name="geometry">
     <rect>

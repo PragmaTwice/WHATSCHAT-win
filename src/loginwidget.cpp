@@ -5,6 +5,8 @@
 LoginWidget::LoginWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::LoginWidget),
+    userPtr(nullptr),
+    isEndStep(false),
     loginingAnime(nullptr),
     msgBar(nullptr),
     usernameCol(nullptr),
@@ -20,6 +22,7 @@ LoginWidget::LoginWidget(QWidget *parent) :
     setStyleSheet(QString("LoginWidget{ background: %1; }").arg(systemColor.name()));
 
     setFixedSize(width(),height());
+    setWindowFlag(Qt::WindowMinMaxButtonsHint,false);
 
     loginingAnime = new WaitingAnime(QRect(20,260,321,31),Qt::white,this);
     loginingAnime->setStyleSheet(QString("QGraphicsView{ border: 0;background: %1; }").arg(systemColor.name()));
@@ -41,6 +44,8 @@ LoginWidget::LoginWidget(QWidget *parent) :
 
     connect(dateCol,SIGNAL(buttonClicked(bool)),this,SLOT(dateButtonClicked(bool)));
     connect(certifyCol,SIGNAL(buttonClicked(bool)),this,SLOT(certifyButtonClicked(bool)));
+
+    connect(msgBar,SIGNAL(messageOutFinished()),this,SLOT(endProcess()));
 
 }
 
@@ -90,7 +95,6 @@ void LoginWidget::dateButtonClicked(bool)
     loginingAnime->start();
     ui->backButton->setVisible(false);
 
-    user* userPtr = nullptr;
     try
     {
         userPtr = new user(usernameCol->refEdit().text(),dateCol->dateTime());
@@ -99,11 +103,14 @@ void LoginWidget::dateButtonClicked(bool)
     {
         forceStopColProcess(dateCol,(err.tag == user_error::network_error)?
                             "network error, please check your connection." : err.reason);
+        delete userPtr;
+        userPtr = nullptr;
         return;
     }
 
     nextColProcess(dateCol,nullptr,QString("your certify: <b>%1</b> , welcome...").arg(userPtr->get_certify()),10000);
     qDebug() << *userPtr;
+    isEndStep = true;
 
 }
 
@@ -121,7 +128,6 @@ void LoginWidget::certifyButtonClicked(bool)
     loginingAnime->start();
     ui->backButton->setVisible(false);
 
-    user* userPtr = nullptr;
     try
     {
         userPtr = new user(usernameCol->refEdit().text(),certify);
@@ -130,11 +136,14 @@ void LoginWidget::certifyButtonClicked(bool)
     {
         forceStopColProcess(certifyCol,(err.tag == user_error::network_error)?
                             "network error, please check your connection." : err.reason);
+        delete userPtr;
+        userPtr = nullptr;
         return;
     }
 
     nextColProcess(certifyCol,nullptr,"welcome back to WHATSCHAT...");
     qDebug() << *userPtr;
+    isEndStep = true;
 
 }
 
@@ -190,4 +199,15 @@ void LoginWidget::on_backButton_clicked(bool)
 {
     backColProcess(nowCol,usernameCol);
     ui->backButton->setVisible(false);
+}
+
+void LoginWidget::endProcess()
+{
+    if(!isEndStep) return;
+
+    close();
+
+    startMainWidget(userPtr);
+
+    destroy();
 }

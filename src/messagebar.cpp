@@ -26,6 +26,9 @@ MessageBar::MessageBar(QWidget *parent, uint height) :
     timer = new QTimer(this);
     connect(timer,SIGNAL(timeout()),this,SLOT(messageOut()));
 
+    connect(up_anime,SIGNAL(finished()),this,SLOT(slot_messageInFinished()));
+    connect(down_anime,SIGNAL(finished()),this,SLOT(slot_messageOutFinished()));
+
 }
 
 MessageBar::~MessageBar()
@@ -39,6 +42,16 @@ void MessageBar::messageOut()
 {
     if(timer->isActive()) timer->stop();
     down_anime->start();
+}
+
+void MessageBar::slot_messageInFinished()
+{
+    emit messageInFinished();
+}
+
+void MessageBar::slot_messageOutFinished()
+{
+    emit messageOutFinished();
 }
 
 void MessageBar::message(const QString &content, const QColor &back_color, const QColor &text_color, uint interval)

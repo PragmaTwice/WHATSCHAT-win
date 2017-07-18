@@ -30,7 +30,8 @@ SOURCES += \
     waitinganime.cpp \
     messagebar.cpp \
     buttonedit.cpp \
-    buttondateedit.cpp
+    buttondateedit.cpp \
+    mainwidget.cpp
 
 HEADERS += \
         loginwidget.h \
@@ -38,10 +39,21 @@ HEADERS += \
     waitinganime.h \
     messagebar.h \
     buttonedit.h \
-    buttondateedit.h
+    buttondateedit.h \
+    mainwidget.h \
+    version.h
+
 
 FORMS += \
-        loginwidget.ui
+        loginwidget.ui \
+    mainwidget.ui
 
 RESOURCES += \
     images.qrc
+
+
+RC_FILE += \
+    WHATSCHAT.rc
+
+DISTFILES += \
+    WHATSCHAT.rc

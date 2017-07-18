@@ -19,8 +19,16 @@ public:
 
     ~MessageBar();
 
+signals:
+    void messageInFinished();
+    void messageOutFinished();
+
 public slots:
     void messageOut();
+
+private slots:
+    void slot_messageInFinished();
+    void slot_messageOutFinished();
 
 public:
     void message(const QString& content, const QColor& back_color, const QColor& text_color = Qt::white, uint interval = 4000);

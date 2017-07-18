@@ -31,8 +31,13 @@ private slots:
 
     void on_backButton_clicked(bool);
 
+    void endProcess();
+
 private:
     Ui::LoginWidget *ui;
+
+    user* userPtr;
+    bool isEndStep;
 
     WaitingAnime* loginingAnime;
     MessageBar* msgBar;
@@ -46,11 +51,14 @@ private:
     QColor systemColor;
 
     void editMove(int duration, QMargins margins);
+
     void forceStopColProcess(ButtonEdit* const col,const QString& warningString);
     bool checkColBlank(ButtonEdit* const col,const QString& warningString);
 
     void nextColProcess(ButtonEdit * const nowCol, ButtonEdit * const nextCol = nullptr, const QString &infoString = "", uint interval = 4000);
     void backColProcess(ButtonEdit * const nowCol, ButtonEdit * const backCol = nullptr, const QString &infoString = "", uint interval = 4000);
 };
+
+void startMainWidget(user* userPtr);
 
 #endif // WIDGET_H

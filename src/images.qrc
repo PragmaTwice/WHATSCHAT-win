@@ -2,6 +2,7 @@
     <qresource prefix="/logo">
         <file alias="lighted">image/logo_lighted.png</file>
         <file alias="normal">image/logo_normal.png</file>
+        <file alias="chat">chat.ico</file>
     </qresource>
     <qresource prefix="/ico">
         <file alias="warning">image/alert.png</file>
