@@ -7,3 +7,6 @@ A Qt-based windows client for WHATSCHAT internet chatroom service.
 
 ## License
 YP License verson 1.0
+
+## Website
+https://c.imtwice.cn
